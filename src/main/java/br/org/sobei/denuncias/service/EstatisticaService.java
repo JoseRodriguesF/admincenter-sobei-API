@@ -19,9 +19,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
+import java.text.Normalizer;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 @Service
@@ -111,27 +114,27 @@ public class EstatisticaService {
 
     private static final List<OficinaMetadata> OFICINAS_CATALOGO = List.of(
             new OficinaMetadata("cleide-derenzi", "Cleide Derenzi Valadas", "Quais os saberes e fazeres tão específicos para, de verdade, atendermos às necessidades dos nossos bebês e crianças pequenas no cotidiano das instituições?", "Primeiríssima Infância", 30),
-            new OficinaMetadata("rodrigo-candido", "Rodrigo Cândido", "Quem dança seus males espanta!", "Expressão Corporal & Dança", 30),
-            new OficinaMetadata("cristiano-santos", "Cristiano dos Santos Araujo", "Entre contos, brincadeiras e canções.", "Música & Tradição Oral", 20),
-            new OficinaMetadata("maria-cecilia", "Maria Cecília Martin Ferri", "Valorizando diferentes culturas através da arte narrativa.", "Arte Narrativa & Culturas", 15),
-            new OficinaMetadata("ana-gilda", "Ana Gilda Leocadio", "Contando Histórias Para Criar Memórias.", "Contação de Histórias", 20),
+            new OficinaMetadata("rodrigo-candido", "Rodrigo Cândido", "Quem dança seus males espanta!", "Expressão Corporal & Dança", 70),
+            new OficinaMetadata("cristiano-santos", "Cristiano dos Santos Araujo", "Entre contos, brincadeiras e canções.", "Música & Tradição Oral", 35),
+            new OficinaMetadata("maria-cecilia", "Maria Cecília Martin Ferri", "Valorizando diferentes culturas através da arte narrativa.", "Arte Narrativa & Culturas", 30),
+            new OficinaMetadata("ana-gilda", "Ana Gilda Leocadio", "Contando Histórias Para Criar Memórias.", "Contação de Histórias", 40),
             new OficinaMetadata("jaqueline-gomes", "Jaqueline Gomes Silva Veleda", "Inclusão na Primeira Infância, Além do Diagnóstico.", "Educação Inclusiva", 30),
-            new OficinaMetadata("marcia-curti", "Márcia Curti de Mello", "Inclusão no lúdico, como o brincar pode ajudar a superar barreiras.", "Lúdico & Acessibilidade", 15),
-            new OficinaMetadata("leila-saita", "Leila Saita", "Vivências para refletir sobre cuidados corporais de qualidade na creche inspirados na Abordagem Pikler.", "Abordagem Pikler", 20),
+            new OficinaMetadata("marcia-curti", "Márcia Curti de Mello", "Inclusão no lúdico, como o brincar pode ajudar a superar barreiras.", "Lúdico & Acessibilidade", 35),
+            new OficinaMetadata("leila-saita", "Leila Saita", "Vivências para refletir sobre cuidados corporais de qualidade na creche inspirados na Abordagem Pikler.", "Abordagem Pikler", 35),
             new OficinaMetadata("erika-silva", "Erika Aparecida da Silva", "Brincar, Criar e Pertencer: experiências antirracistas por meio das múltiplas linguagens da infância.", "Educação Antirracista", 50),
-            new OficinaMetadata("regiane-lays", "Regiane Lays Jacinto de Brito", "Saberes que alimentam: cuidado, memória e pertencimento na experiência de quem atua na cozinha.", "Cuidado & Terapia Integrativa", 30),
-            new OficinaMetadata("liliane-laviano", "Liliane Laviano", "Jogo da Arquitetura Cerebral — Como as experiências na primeira infância moldam a arquitetura do cérebro.", "Neurociência & Desenvolvimento", 25),
-            new OficinaMetadata("talita-marques", "Talita Regina Lopes de Oliveira Marques", "A importância do Brincar com Areia na Educação Infantil.", "Brincar Sensorial", 30),
-            new OficinaMetadata("irene-silva", "Irene Izilda da Silva", "A literatura infantil como ferramenta de educação antirracista dialogando com as relações étnico-raciais na pedagogia da infância.", "Literatura & Relações Étnico-Raciais", 30),
-            new OficinaMetadata("patricia-couto", "Patrícia Couto Gimael", "Cuidados, linguagem e inclusão.", "Linguagem & Cuidados", 25),
-            new OficinaMetadata("raissa-cintra", "Raissa Cintra", "Corpo e Movimento.", "Psicomotricidade & Movimento", 25),
-            new OficinaMetadata("shirley-oliveira", "Shirley Maria de Oliveira", "Dos acalantos às rodas de verso: a música tradicional da infância embalando os brinquedos de criança. (Shirley Oliveira)", "Música & Cultura Popular", 30),
-            new OficinaMetadata("elaine-silva", "Elaine Maria da Silva", "Dos acalantos às rodas de verso: a música tradicional da infância embalando os brinquedos de criança. (Elaine Silva)", "Música & Cultura Popular", 30),
-            new OficinaMetadata("rose-brito", "Rose Brito", "Entre Cantos, Contos e Batucadas.", "Musicalidade & Contos", 20),
-            new OficinaMetadata("ivani-magalhaes", "Ivani Magalhães", "Rodas e brincadeiras cantadas.", "Música & Tradição Popular", 20),
-            new OficinaMetadata("marcia-polacchini", "Márcia Polacchini", "Jogos Teatrais.", "Teatro & Expressão Artística", 20),
-            new OficinaMetadata("leticia-oliveira", "Leticia de Almeida Oliveira", "Alimentação segura e pedagógica na escola: manejo clínico e comportamental (0 a 4 anos).", "Nutrição & Manejo Clínico", 20),
-            new OficinaMetadata("juliana-leticia", "Leticia Alves", "Escuta Ativa: A Fonoaudiologia no Cotidiano da Pedagogia da Infância.", "Fonoaudiologia & Escuta Ativa", 20),
+            new OficinaMetadata("regiane-lays", "Regiane Lays Jacinto de Brito", "Saberes que alimentam: cuidado, memória e pertencimento na experiência de quem atua na cozinha.", "Cuidado & Terapia Integrativa", 80),
+            new OficinaMetadata("liliane-laviano", "Liliane Laviano", "Jogo da Arquitetura Cerebral — Como as experiências na primeira infância moldam a arquitetura do cérebro.", "Neurociência & Desenvolvimento", 35),
+            new OficinaMetadata("talita-marques", "Talita Regina Lopes de Oliveira Marques", "A importância do Brincar com Areia na Educação Infantil.", "Brincar Sensorial", 40),
+            new OficinaMetadata("irene-silva", "Irene Izilda da Silva", "A literatura infantil como ferramenta de educação antirracista dialogando com as relações étnico-raciais na pedagogia da infância.", "Literatura & Relações Étnico-Raciais", 40),
+            new OficinaMetadata("patricia-couto", "Patrícia Couto Gimael", "Cuidados, linguagem e inclusão.", "Linguagem & Cuidados", 35),
+            new OficinaMetadata("raissa-cintra", "Raissa Cintra", "Corpo e Movimento.", "Psicomotricidade & Movimento", 30),
+            new OficinaMetadata("shirley-oliveira", "Shirley Maria de Oliveira", "Dos acalantos às rodas de verso: a música tradicional da infância embalando os brinquedos de criança. (Shirley Oliveira)", "Música & Cultura Popular", 40),
+            new OficinaMetadata("elaine-silva", "Elaine Maria da Silva", "Dos acalantos às rodas de verso: a música tradicional da infância embalando os brinquedos de criança. (Elaine Silva)", "Música & Cultura Popular", 40),
+            new OficinaMetadata("rose-brito", "Rose Brito", "Entre Cantos, Contos e Batucadas.", "Musicalidade & Contos", 30),
+            new OficinaMetadata("ivani-magalhaes", "Ivani Magalhães", "Rodas e brincadeiras cantadas.", "Música & Tradição Popular", 30),
+            new OficinaMetadata("marcia-polacchini", "Márcia Polacchini", "Jogos Teatrais.", "Teatro & Expressão Artística", 35),
+            new OficinaMetadata("leticia-oliveira", "Leticia de Almeida Oliveira", "Alimentação segura e pedagógica na escola: manejo clínico e comportamental (0 a 4 anos).", "Nutrição & Manejo Clínico", 40),
+            new OficinaMetadata("juliana-leticia", "Leticia Alves", "Escuta Ativa: A Fonoaudiologia no Cotidiano da Pedagogia da Infância.", "Fonoaudiologia & Escuta Ativa", 30),
             new OficinaMetadata("shirley-silva", "Shirley da Silva", "Motricidade Livre.", "Desenvolvimento Motor & Psicomotricidade", 35)
     );
 
@@ -250,26 +253,8 @@ public class EstatisticaService {
                 .sorted(Comparator.comparingLong(EstatisticaCongressoResponse.OficinaCongressoStat::getTotalInscritos).reversed())
                 .collect(Collectors.toList());
 
-        // 3. Outras OSCs
-        Map<String, Long> porOutraOscMap = todas.stream()
-                .filter(i -> !"SOBEI".equalsIgnoreCase(i.getTipoOsc()))
-                .collect(Collectors.groupingBy(i -> {
-                    String o = i.getOutraOsc();
-                    if (o == null || o.isBlank()) return "Outras Instituições";
-                    return o.trim();
-                }, Collectors.counting()));
-
-        List<EstatisticaCongressoResponse.OutraOscStat> porOutraOsc = porOutraOscMap.entrySet().stream()
-                .map(e -> {
-                    double part = totalOutrasOsc > 0 ? Math.round(((double) e.getValue() / totalOutrasOsc * 100) * 10.0) / 10.0 : 0.0;
-                    return EstatisticaCongressoResponse.OutraOscStat.builder()
-                            .nomeOsc(e.getKey())
-                            .totalInscritos(e.getValue())
-                            .percentualOutras(part)
-                            .build();
-                })
-                .sorted(Comparator.comparingLong(EstatisticaCongressoResponse.OutraOscStat::getTotalInscritos).reversed())
-                .collect(Collectors.toList());
+        // 3. Outras OSCs (unificando pequenas variações de nomes como CT-Vidas, CT Vidas, etc.)
+        List<EstatisticaCongressoResponse.OutraOscStat> porOutraOsc = agruparOutrasOscs(todas, totalOutrasOsc);
 
         // 4. Evolução Temporal (Gráfico de Crescimento)
         DateTimeFormatter dtfDiaMes = DateTimeFormatter.ofPattern("dd/MM");
@@ -338,6 +323,112 @@ public class EstatisticaService {
         if (chave.contains(chaveTema) || chaveTema.contains(chave)) return true;
         if (chaveMin.length() >= 8 && (chave.contains(chaveMin) || chaveMin.contains(chave))) return true;
         return false;
+    }
+
+    /**
+     * Unifica variações e pequenas diferenças no nome de outras instituições (ex: CT-Vidas, CT Vidas, CTVidas, etc.)
+     */
+    private List<EstatisticaCongressoResponse.OutraOscStat> agruparOutrasOscs(List<InscricaoCongresso> todas, long totalOutrasOsc) {
+        List<InscricaoCongresso> outrasInscricoes = todas.stream()
+                .filter(i -> !"SOBEI".equalsIgnoreCase(i.getTipoOsc()))
+                .toList();
+
+        if (outrasInscricoes.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        // Agrupa por chave canônica
+        Map<String, List<String>> gruposChave = new HashMap<>();
+        for (InscricaoCongresso insc : outrasInscricoes) {
+            String raw = insc.getOutraOsc();
+            if (raw == null || raw.trim().isBlank()) {
+                raw = "Outras Instituições";
+            } else {
+                raw = raw.trim();
+            }
+            String chave = gerarChaveCanonicaOsc(raw);
+            gruposChave.computeIfAbsent(chave, k -> new ArrayList<>()).add(raw);
+        }
+
+        List<EstatisticaCongressoResponse.OutraOscStat> resultado = new ArrayList<>();
+        for (Map.Entry<String, List<String>> entry : gruposChave.entrySet()) {
+            List<String> ocorrencias = entry.getValue();
+            long total = ocorrencias.size();
+            String nomeEscolhido = escolherMelhorNomeOsc(ocorrencias);
+            double part = totalOutrasOsc > 0
+                    ? Math.round(((double) total / totalOutrasOsc * 100) * 10.0) / 10.0
+                    : 0.0;
+
+            resultado.add(EstatisticaCongressoResponse.OutraOscStat.builder()
+                    .nomeOsc(nomeEscolhido)
+                    .totalInscritos(total)
+                    .percentualOutras(part)
+                    .build());
+        }
+
+        resultado.sort(Comparator.comparingLong(EstatisticaCongressoResponse.OutraOscStat::getTotalInscritos).reversed());
+        return resultado;
+    }
+
+    private String gerarChaveCanonicaOsc(String raw) {
+        if (raw == null || raw.trim().isBlank()) {
+            return "outras";
+        }
+        // 1. Remover acentos
+        String semAcento = Normalizer.normalize(raw.trim(), Normalizer.Form.NFD)
+                .replaceAll("\\p{M}", "")
+                .toLowerCase();
+
+        // 2. Se houver sigla/código entre parênteses, ex: 'Centro de Treinamento (CT-Vidas)'
+        Matcher parenMatcher = Pattern.compile("\\((.*?)\\)").matcher(semAcento);
+        if (parenMatcher.find()) {
+            String inside = parenMatcher.group(1).replaceAll("[^a-z0-9]", "");
+            if (inside.length() >= 2 && inside.length() <= 12) {
+                return inside;
+            }
+        }
+
+        // 3. Se houver separador de cláusula com espaços, ex: 'CTVidas - Centro de Treinamento das Vidas'
+        String[] partes = semAcento.split("\\s+[-/|:]\\s+");
+        String principal = partes[0].trim();
+
+        // 4. Remover pontuação e manter apenas caracteres alfanuméricos
+        String alfa = principal.replaceAll("[^a-z0-9]", "");
+        return alfa.isEmpty() ? "outras" : alfa;
+    }
+
+    private String escolherMelhorNomeOsc(List<String> nomes) {
+        if (nomes == null || nomes.isEmpty()) return "Outras Instituições";
+
+        // Contagem de frequência
+        Map<String, Long> contagens = nomes.stream()
+                .collect(Collectors.groupingBy(s -> s, Collectors.counting()));
+
+        // Seleciona o melhor nome baseado em pontuação
+        return contagens.keySet().stream()
+                .max((a, b) -> {
+                    long scoreA = contagens.get(a) * 10L;
+                    long scoreB = contagens.get(b) * 10L;
+
+                    // Prefere nomes sem separadores longos como " - "
+                    if (a.contains(" - ")) scoreA -= 5L;
+                    if (b.contains(" - ")) scoreB -= 5L;
+
+                    // Prefere siglas em caixa alta (ex: CT)
+                    if (a.matches(".*\\b[A-Z]{2,}\\b.*")) scoreA += 3L;
+                    if (b.matches(".*\\b[A-Z]{2,}\\b.*")) scoreB += 3L;
+
+                    // Prefere primeira letra maiúscula
+                    if (Character.isUpperCase(a.charAt(0))) scoreA += 2L;
+                    if (Character.isUpperCase(b.charAt(0))) scoreB += 2L;
+
+                    if (scoreA != scoreB) {
+                        return Long.compare(scoreA, scoreB);
+                    }
+                    // Em caso de empate, tamanho mais conciso
+                    return Integer.compare(b.length(), a.length());
+                })
+                .orElse(nomes.get(0));
     }
 }
 
